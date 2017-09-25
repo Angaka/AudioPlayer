@@ -1,10 +1,13 @@
 package com.projects.venom04.audioplayer.views.activities;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,11 +15,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.projects.venom04.audioplayer.R;
+import com.projects.venom04.audioplayer.models.Audio;
+import com.projects.venom04.audioplayer.services.MediaPlayerService;
+import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private MediaPlayerService mMediaPlayerService;
+    private boolean mServiceBound = false;
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) iBinder;
+            mMediaPlayerService = binder.getService();
+            mServiceBound = true;
+            Toast.makeText(MainActivity.this, "Service bound", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mServiceBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,5 +125,15 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    private void playAudio(Audio audio) {
+        if (!mServiceBound) {
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            playerIntent.putExtra(AudioPlayerUtils.MEDIA, audio.getPath());
+            startService(playerIntent);
+            bindService(playerIntent, mServiceConnection, BIND_AUTO_CREATE);
+        } else {}
     }
 }
