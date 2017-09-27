@@ -17,6 +17,12 @@ public class AudioPlayerUtils {
 
     public static final String PLAY_NEW_AUDIO = "com.projects.venom04.audioplayer.PlayNewAudio";
 
+    public static final String ACTION_PLAY = "com.projects.venom04.audioplayer.ACTION_PLAY";
+    public static final String ACTION_PAUSE = "com.projects.venom04.audioplayer.ACTION_PAUSE";
+    public static final String ACTION_PREVIOUS = "com.projects.venom04.audioplayer.ACTION_PREVIOUS";
+    public static final String ACTION_NEXT = "com.projects.venom04.audioplayer.ACTION_NEXT";
+    public static final String ACTION_STOP = "com.projects.venom04.audioplayer.ACTION_STOP";
+
     public static boolean isLatin(String value) {
         return value.matches("[ \\w]+");
     }
