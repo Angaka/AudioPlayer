@@ -13,6 +13,8 @@ public class AudioPlayerUtils {
     public static final String MEDIA = "media";
     public static final String MUSICS = "musics";
 
+    public static final String SERVICE_STATE = "service_state";
+
     public static boolean isLatin(String value) {
         return value.matches("[ \\w]+");
     }
