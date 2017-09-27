@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
-import com.projects.venom04.audioplayer.models.Audio;
+import com.projects.venom04.audioplayer.models.pojo.Audio;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 
 public class AudioFileManager {
-
+    private static final String TAG = "AudioFileManager";
     private Context mContext;
 
     public AudioFileManager(Context context) {
@@ -48,7 +48,8 @@ public class AudioFileManager {
                 String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
 
-                audios.add(new Audio(id, path, artist, album, title, duration));
+                Audio audio = new Audio(id, path, artist, album, title, duration);
+                audios.add(audio);
             }
         }
 

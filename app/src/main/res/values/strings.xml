@@ -5,4 +5,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="permissions_request">You need to grant some permissions</string>
+    <string name="see_permissions">See permissions</string>
 </resources>

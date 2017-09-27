@@ -1,14 +1,21 @@
 package com.projects.venom04.audioplayer.views.activities;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,15 +26,43 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.projects.venom04.audioplayer.R;
-import com.projects.venom04.audioplayer.models.Audio;
-import com.projects.venom04.audioplayer.services.MediaPlayerService;
+import com.projects.venom04.audioplayer.controllers.AudioFileManager;
+import com.projects.venom04.audioplayer.models.pojo.Audio;
+import com.projects.venom04.audioplayer.models.services.MediaPlayerService;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
+import com.projects.venom04.audioplayer.utils.EnhancedSharedPreferences;
+import com.projects.venom04.audioplayer.utils.PermissionsService;
+import com.projects.venom04.audioplayer.views.fragments.MusicsFragment;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    @BindView(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.nav_view)
+    NavigationView mNavView;
+    @BindView(R.id.tab_layout)
+    TabLayout mTabLayout;
+    @BindView(R.id.view_pager)
+    ViewPager mViewPager;
+
+    private PermissionsService mPermissionsService;
+    private EnhancedSharedPreferences mPreferences;
+    private Snackbar mSnackBarPermissions;
+
     private MediaPlayerService mMediaPlayerService;
     private boolean mServiceBound = false;
+
+    private AudioFileManager mAudioFileManager;
+    private PagerAdapter mPagerAdapter;
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -48,33 +83,50 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        ButterKnife.bind(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        setSupportActionBar(mToolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavView.setNavigationItemSelectedListener(this);
+
+        mSnackBarPermissions = Snackbar
+                .make(findViewById(android.R.id.content), R.string.permissions_request, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.see_permissions,
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                ArrayList<String> unacceptedPermissions = mPermissionsService.findUnacceptedPermissions(Arrays.asList(AudioPlayerUtils.PERMISSIONS));
+                                String[] permissionsArray = new String[unacceptedPermissions.size()];
+
+                                for (int i = 0; i < unacceptedPermissions.size(); i++)
+                                    permissionsArray[i] = unacceptedPermissions.get(i);
+                                requestPermissions(permissionsArray, AudioPlayerUtils.REQUEST_CODE);
+                            }
+                        });
+
+        SharedPreferences preferences = getBaseContext().getSharedPreferences(AudioPlayerUtils.PREFS, Context.MODE_PRIVATE);
+        mPreferences = new EnhancedSharedPreferences(preferences);
+
+        mAudioFileManager = new AudioFileManager(this);
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), MainActivity.this);
+
+        if (!isAllPermissionsAccepted() && !mSnackBarPermissions.isShown()) {
+            mSnackBarPermissions.show();
+        } else {
+            mViewPager.setAdapter(mPagerAdapter);
+            mTabLayout.setupWithViewPager(mViewPager);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -122,11 +174,9 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     private void playAudio(Audio audio) {
         if (!mServiceBound) {
@@ -134,6 +184,89 @@ public class MainActivity extends AppCompatActivity
             playerIntent.putExtra(AudioPlayerUtils.MEDIA, audio.getPath());
             startService(playerIntent);
             bindService(playerIntent, mServiceConnection, BIND_AUTO_CREATE);
-        } else {}
+        } else {
+
+        }
     }
+
+
+    private boolean isAllPermissionsAccepted() {
+        mPermissionsService = new PermissionsService(this, mPreferences);
+
+        ArrayList<String> unaskedPermissions = mPermissionsService.findUnAskedPermissions(Arrays.asList(AudioPlayerUtils.PERMISSIONS));
+
+        if (!unaskedPermissions.isEmpty()) {
+            String[] permissionsArray = new String[unaskedPermissions.size()];
+
+            for (int i = 0; i < unaskedPermissions.size(); i++)
+                permissionsArray[i] = unaskedPermissions.get(i);
+            requestPermissions(permissionsArray, AudioPlayerUtils.REQUEST_CODE);
+            return false;
+        } else {
+            ArrayList<String> unacceptedPermission = mPermissionsService.findUnacceptedPermissions(Arrays.asList(AudioPlayerUtils.PERMISSIONS));
+            if (!unacceptedPermission.isEmpty())
+                return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case AudioPlayerUtils.REQUEST_CODE:
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < grantResults.length; i++)
+                        mPermissionsService.markAsAsked(permissions[i]);
+
+                    ArrayList<String> unacceptedPermissions = mPermissionsService.findUnacceptedPermissions(Arrays.asList(AudioPlayerUtils.PERMISSIONS));
+                    if (!unacceptedPermissions.isEmpty()) {
+                        if (!mSnackBarPermissions.isShown())
+                            mSnackBarPermissions.show();
+                    } else {
+                        if (mSnackBarPermissions.isShown())
+                            mSnackBarPermissions.dismiss();
+                        mViewPager.setAdapter(mPagerAdapter);
+                        mTabLayout.setupWithViewPager(mViewPager);
+                    }
+
+                }
+                break;
+        }
+    }
+
+
+    public class PagerAdapter extends FragmentPagerAdapter {
+        private final int PAGE_COUNT = 2;
+        private String mTabTitles[] = new String[] { "Musics", "Albums" };
+        private Context mContext;
+
+        PagerAdapter(FragmentManager fm, Context context) {
+            super(fm);
+            mContext = context;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return MusicsFragment.newInstance(mAudioFileManager.loadAllAudios());
+                case 1:
+                    return MusicsFragment.newInstance(mAudioFileManager.loadAllAudios());
+                default:
+                    return MusicsFragment.newInstance(mAudioFileManager.loadAllAudios());
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return PAGE_COUNT;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mTabTitles[position];
+        }
+    }
+
 }

@@ -1,10 +1,12 @@
-package com.projects.venom04.audioplayer.models;
+package com.projects.venom04.audioplayer.models.pojo;
+
+import java.io.Serializable;
 
 /**
  * Created by Venom on 25/09/2017.
  */
 
-public class Audio {
+public class Audio implements Serializable {
 
     private long id;
     private String path;
@@ -68,5 +70,17 @@ public class Audio {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    @Override
+    public String toString() {
+        return "Audio{" +
+                "id=" + id +
+                ", path='" + path + '\'' +
+                ", artist='" + artist + '\'' +
+                ", album='" + album + '\'' +
+                ", title='" + title + '\'' +
+                ", duration=" + duration +
+                '}';
     }
 }

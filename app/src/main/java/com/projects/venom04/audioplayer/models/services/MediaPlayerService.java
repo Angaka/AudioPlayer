@@ -1,4 +1,4 @@
-package com.projects.venom04.audioplayer.services;
+package com.projects.venom04.audioplayer.models.services;
 
 import android.app.Service;
 import android.content.Context;
