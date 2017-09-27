@@ -1,20 +1,23 @@
 package com.projects.venom04.audioplayer.views.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
 
 import com.projects.venom04.audioplayer.R;
+import com.projects.venom04.audioplayer.models.interfaces.IAudio;
+import com.projects.venom04.audioplayer.models.interfaces.IRecyclerView;
 import com.projects.venom04.audioplayer.models.pojo.Audio;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
-import com.projects.venom04.audioplayer.views.adapters.ExpandableMusicsAdapter;
+import com.projects.venom04.audioplayer.views.adapters.AudiosAdapter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,25 +26,33 @@ import butterknife.ButterKnife;
  * Created by Venom on 25/09/2017.
  */
 
-public class MusicsFragment extends Fragment {
+public class MusicsFragment extends Fragment implements IRecyclerView {
 
     private static final String TAG = "MusicsFragment";
 
-    @BindView(R.id.expandable_lv_musics)
-    ExpandableListView mExpLvMusics;
+    @BindView(R.id.recycler_view_musics)
+    RecyclerView mRvMusics;
 
-    private List<String> mListHeaderData;
-    private HashMap<String, List<Audio>> mListChildData;
-    private ArrayList<Audio> mMusics;
+    private AudiosAdapter mAdapter;
+    private ArrayList<Audio> mAudiosList;
 
-    public static MusicsFragment newInstance(ArrayList<Audio> musics) {
+    private IAudio mListener;
+
+    public static MusicsFragment newInstance(ArrayList<Audio> audiosList) {
 
         Bundle args = new Bundle();
 
         MusicsFragment fragment = new MusicsFragment();
-        args.putSerializable(AudioPlayerUtils.MUSICS, musics);
+        args.putSerializable(AudioPlayerUtils.AUDIOS, audiosList);
         fragment.setArguments(args);
         return fragment;
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mListener = (IAudio) context;
     }
 
     @Override
@@ -49,10 +60,8 @@ public class MusicsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mMusics = (ArrayList<Audio>) getArguments().getSerializable(AudioPlayerUtils.MUSICS);
+            mAudiosList = (ArrayList<Audio>) getArguments().getSerializable(AudioPlayerUtils.AUDIOS);
         }
-        mListHeaderData = new ArrayList<>();
-        mListChildData = new HashMap<>();
     }
 
     @Override
@@ -60,39 +69,20 @@ public class MusicsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_musics, container, false);
         ButterKnife.bind(this, view);
 
-        initData();
-
-        ExpandableMusicsAdapter adapter = new ExpandableMusicsAdapter(getContext(), mListHeaderData, mListChildData);
-        mExpLvMusics.setAdapter(adapter);
-        mExpLvMusics.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                return true;
-            }
-        });
-        for (int i = 0; i < adapter.getGroupCount(); i++)
-           mExpLvMusics.expandGroup(i);
+        mAdapter = new AudiosAdapter(getContext(), mAudiosList, this);
+        
+        mRvMusics.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRvMusics.setLayoutManager(linearLayoutManager);
+        mRvMusics.setAdapter(mAdapter);
 
         return view;
     }
 
-    public void initData() {
-        char[] alphabet = "#abcdefghijklmnopqrstuvwxyz".toCharArray();
-
-        for (char letter : alphabet) {
-            String strLetter = String.valueOf(letter);
-            mListHeaderData.add(strLetter);
-        }
-
-        for (String letterHeader : mListHeaderData) {
-            List<Audio> audios = new ArrayList<>();
-            for (Audio audio : mMusics) {
-                char firstLetter = audio.getTitle().charAt(0);
-                if (letterHeader.equals(String.valueOf(firstLetter).toLowerCase())) {
-                    audios.add(audio);
-                }
-            }
-            mListChildData.put(letterHeader, audios);
-        }
+    @Override
+    public void onItemClicked(View view, int position) {
+        Log.d(TAG, "onItemClicked: " + position);
+        mListener.onSelectedAudioInList(position);
     }
 }

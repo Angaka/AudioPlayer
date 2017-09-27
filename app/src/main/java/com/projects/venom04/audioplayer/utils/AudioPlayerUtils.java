@@ -11,9 +11,11 @@ public class AudioPlayerUtils {
     public static final int REQUEST_CODE = 200;
 
     public static final String MEDIA = "media";
-    public static final String MUSICS = "musics";
+    public static final String AUDIOS = "audios";
 
     public static final String SERVICE_STATE = "service_state";
+
+    public static final String PLAY_NEW_AUDIO = "com.projects.venom04.audioplayer.PlayNewAudio";
 
     public static boolean isLatin(String value) {
         return value.matches("[ \\w]+");

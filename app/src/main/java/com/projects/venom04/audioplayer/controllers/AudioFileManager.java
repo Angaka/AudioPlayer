@@ -16,12 +16,14 @@ public class AudioFileManager {
     private static final String TAG = "AudioFileManager";
     private Context mContext;
 
+    private ArrayList<Audio> mAudiosList;
+
     public AudioFileManager(Context context) {
         mContext = context;
     }
 
-    public ArrayList<Audio> loadAllAudios() {
-        ArrayList<Audio> audios = new ArrayList<>();
+    public void loadAllAudios() {
+        mAudiosList = new ArrayList<>();
 
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
         String[] projection = {
@@ -49,14 +51,16 @@ public class AudioFileManager {
                 long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
 
                 Audio audio = new Audio(id, path, artist, album, title, duration);
-                audios.add(audio);
+                mAudiosList.add(audio);
             }
         }
 
         if (cursor != null) {
             cursor.close();
         }
+    }
 
-        return audios;
+    public ArrayList<Audio> getAudiosList() {
+        return mAudiosList;
     }
 }

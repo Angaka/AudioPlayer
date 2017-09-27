@@ -1,6 +1,7 @@
 package com.projects.venom04.audioplayer.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
@@ -15,9 +16,9 @@ public class PermissionsService {
     private static final String TAG = "PermissionsService";
 
     private Context mContext;
-    private static EnhancedSharedPreferences mPreferences;
+    private static SharedPreferences mPreferences;
 
-    public PermissionsService(Context context, EnhancedSharedPreferences preferences) {
+    public PermissionsService(Context context, SharedPreferences preferences) {
         mContext = context;
         mPreferences = preferences;
     }

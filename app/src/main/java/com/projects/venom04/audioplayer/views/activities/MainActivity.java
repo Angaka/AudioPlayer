@@ -27,11 +27,11 @@ import android.widget.Toast;
 
 import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.controllers.AudioFileManager;
-import com.projects.venom04.audioplayer.models.pojo.Audio;
+import com.projects.venom04.audioplayer.models.interfaces.IAudio;
 import com.projects.venom04.audioplayer.models.services.MediaPlayerService;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
-import com.projects.venom04.audioplayer.utils.EnhancedSharedPreferences;
 import com.projects.venom04.audioplayer.utils.PermissionsService;
+import com.projects.venom04.audioplayer.utils.StorageUtil;
 import com.projects.venom04.audioplayer.views.fragments.MusicsFragment;
 
 import java.util.ArrayList;
@@ -41,7 +41,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener
+            , IAudio {
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity
     ViewPager mViewPager;
 
     private PermissionsService mPermissionsService;
-    private EnhancedSharedPreferences mPreferences;
+    private SharedPreferences mPreferences;
     private Snackbar mSnackBarPermissions;
 
     private MediaPlayerService mMediaPlayerService;
@@ -109,8 +110,7 @@ public class MainActivity extends AppCompatActivity
                             }
                         });
 
-        SharedPreferences preferences = getBaseContext().getSharedPreferences(AudioPlayerUtils.PREFS, Context.MODE_PRIVATE);
-        mPreferences = new EnhancedSharedPreferences(preferences);
+        mPreferences = getSharedPreferences(AudioPlayerUtils.PREFS, Context.MODE_PRIVATE);
 
         mAudioFileManager = new AudioFileManager(this);
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), MainActivity.this);
@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity
         if (!isAllPermissionsAccepted() && !mSnackBarPermissions.isShown()) {
             mSnackBarPermissions.show();
         } else {
+            mAudioFileManager.loadAllAudios();
             mViewPager.setAdapter(mPagerAdapter);
             mTabLayout.setupWithViewPager(mViewPager);
         }
@@ -199,18 +200,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void playAudio(Audio audio) {
-        if (!mServiceBound) {
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            playerIntent.putExtra(AudioPlayerUtils.MEDIA, audio.getPath());
-            startService(playerIntent);
-            bindService(playerIntent, mServiceConnection, BIND_AUTO_CREATE);
-        } else {
-
-        }
-    }
-
-
     private boolean isAllPermissionsAccepted() {
         mPermissionsService = new PermissionsService(this, mPreferences);
 
@@ -256,6 +245,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onSelectedAudioInList(int audioIndex) {
+        StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+        if (!mServiceBound) {
+            storageUtil.storeAudios(mAudioFileManager.getAudiosList());
+            storageUtil.storeAudioIndex(audioIndex);
+
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            startService(playerIntent);
+            bindService(playerIntent, mServiceConnection, BIND_AUTO_CREATE);
+        } else {
+            storageUtil.storeAudioIndex(audioIndex);
+
+            Intent broadcastIntent = new Intent(AudioPlayerUtils.PLAY_NEW_AUDIO);
+            sendBroadcast(broadcastIntent);
+        }
+    }
 
     public class PagerAdapter extends FragmentPagerAdapter {
         private final int PAGE_COUNT = 2;
@@ -271,11 +277,11 @@ public class MainActivity extends AppCompatActivity
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return MusicsFragment.newInstance(mAudioFileManager.loadAllAudios());
+                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
                 case 1:
-                    return MusicsFragment.newInstance(mAudioFileManager.loadAllAudios());
+                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
                 default:
-                    return MusicsFragment.newInstance(mAudioFileManager.loadAllAudios());
+                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
             }
         }
 

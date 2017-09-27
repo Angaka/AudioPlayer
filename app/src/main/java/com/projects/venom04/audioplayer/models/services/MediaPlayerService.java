@@ -1,18 +1,25 @@
 package com.projects.venom04.audioplayer.models.services;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.projects.venom04.audioplayer.models.pojo.Audio;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
+import com.projects.venom04.audioplayer.utils.StorageUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by Venom on 25/09/2017.
@@ -36,15 +43,64 @@ public class MediaPlayerService extends Service
     private String mMediaFile;
     private int mResumePosition;
 
+    private boolean mOnGoingCall = false;
+    private PhoneStateListener mPhoneStateListener;
+    private TelephonyManager mTelephonyManager;
+
+
+    private BroadcastReceiver mBecomingNoisyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            pauseMedia();
+        }
+    };
+
+    private ArrayList<Audio> mAudiosList;
+    private int mAudioIndex = -1;
+    private Audio mActiveAudio;
+
+    private BroadcastReceiver mPlayNewAudio = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mAudioIndex = new StorageUtil(getApplicationContext()).loadAudioIndex();
+            if (mAudioIndex != -1 && mAudioIndex < mAudiosList.size()) {
+                mActiveAudio = mAudiosList.get(mAudioIndex);
+            } else {
+                stopSelf();
+            }
+
+            stopMedia();
+            mMediaPlayer.reset();
+            initMediaPlayer();
+/*            updateMetadata();
+            buildNotification(PlaybackState.STATE_PLAYING);*/
+        }
+    };
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        callStateListener();
+        registerBecomingNoisyReceiver();
+        playNewAudio();
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
-            mMediaFile = intent.getExtras().getString(AudioPlayerUtils.MEDIA);
+            StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+            mAudiosList = storageUtil.loadAudios();
+            mAudioIndex = storageUtil.loadAudioIndex();
+
+            if (mAudioIndex != -1 && mAudioIndex < mAudiosList.size())
+                mActiveAudio = mAudiosList.get(mAudioIndex);
+            else
+                stopSelf();
         } catch (NullPointerException e) {
             stopSelf();
         }
@@ -65,6 +121,13 @@ public class MediaPlayerService extends Service
             mMediaPlayer.release();
         }
         removeAudioFocus();
+        if (mPhoneStateListener != null)
+            mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+       // removeNotification();
+        unregisterReceiver(mBecomingNoisyReceiver);
+        unregisterReceiver(mPlayNewAudio);
+
+        new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
     }
 
     private void initMediaPlayer() {
@@ -180,6 +243,41 @@ public class MediaPlayerService extends Service
                     mMediaPlayer.pause();
                 break;
         }
+    }
+
+    private void registerBecomingNoisyReceiver() {
+        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        registerReceiver(mBecomingNoisyReceiver, intentFilter);
+    }
+
+    private void callStateListener() {
+        mTelephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        mPhoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        if (mMediaPlayer != null) {
+                            pauseMedia();
+                            mOnGoingCall = true;
+                        }
+                        break;
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        if (mMediaPlayer != null) {
+                            resumeMedia();
+                            mOnGoingCall = false;
+                        }
+                        break;
+                }
+            }
+        };
+        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    private void playNewAudio() {
+        IntentFilter intentFilter = new IntentFilter(AudioPlayerUtils.PLAY_NEW_AUDIO);
+        registerReceiver(mPlayNewAudio, intentFilter);
     }
 
     private boolean requestAudioFocus() {
