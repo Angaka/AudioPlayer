@@ -89,12 +89,10 @@ public class MediaPlayerService extends Service
                     stopMedia();
                     mMediaPlayer.reset();
                     initMediaPlayer();
-                    updateMetaData();
-                    buildNotification(PlaybackState.STATE_PLAYING);
+                    playMedia();
                     break;
                 case AudioManager.ACTION_AUDIO_BECOMING_NOISY:
                     pauseMedia();
-                    buildNotification(PlaybackState.STATE_PAUSED);
                     break;
             }
 
@@ -223,30 +221,24 @@ public class MediaPlayerService extends Service
             public void onPlay() {
                 super.onPlay();
                 resumeMedia();
-                buildNotification(PlaybackState.STATE_PLAYING);
             }
 
             @Override
             public void onPause() {
                 super.onPause();
                 pauseMedia();
-                buildNotification(PlaybackState.STATE_PAUSED);
             }
 
             @Override
             public void onSkipToNext() {
                 super.onSkipToNext();
                 skipToNext();
-                updateMetaData();
-                buildNotification(PlaybackState.STATE_PLAYING);
             }
 
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
                 skipToPrevious();
-                updateMetaData();
-                buildNotification(PlaybackState.STATE_PLAYING);
             }
 
             @Override
@@ -290,18 +282,24 @@ public class MediaPlayerService extends Service
     private void playMedia() {
         if (!mMediaPlayer.isPlaying())
             mMediaPlayer.start();
+        updateMetaData();
+        buildNotification(PlaybackState.STATE_PLAYING);
     }
 
     private void stopMedia() {
         if (mMediaPlayer == null) return;
-        if (mMediaPlayer.isPlaying())
+        if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
+            buildNotification(PlaybackState.STATE_PAUSED);
+        }
     }
 
     private void pauseMedia() {
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
             mResumePosition = mMediaPlayer.getCurrentPosition();
+            updateMetaData();
+            buildNotification(PlaybackState.STATE_PAUSED);
         }
     }
 
@@ -309,7 +307,44 @@ public class MediaPlayerService extends Service
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.seekTo(mResumePosition);
             mMediaPlayer.start();
+            buildNotification(PlaybackState.STATE_PLAYING);
         }
+    }
+
+    private void skipToPrevious() {
+        if (mAudioIndex == 0) {
+            mAudioIndex = mAudiosList.size() - 1;
+            mActiveAudio = mAudiosList.get(mAudioIndex);
+        } else {
+            mActiveAudio = mAudiosList.get(--mAudioIndex);
+        }
+
+        mStorageUtil.storeAudioIndex(mAudioIndex);
+
+        stopMedia();
+        mMediaPlayer.reset();
+        initMediaPlayer();
+
+        updateMetaData();
+        buildNotification(PlaybackState.STATE_PLAYING);
+    }
+
+    private void skipToNext() {
+        if (mAudioIndex == mAudiosList.size() - 1) {
+            mAudioIndex = 0;
+            mActiveAudio = mAudiosList.get(mAudioIndex);
+        } else {
+            mActiveAudio = mAudiosList.get(++mAudioIndex);
+        }
+
+        mStorageUtil.storeAudioIndex(mAudioIndex);
+
+        stopMedia();
+        mMediaPlayer.reset();
+        initMediaPlayer();
+
+        updateMetaData();
+        buildNotification(PlaybackState.STATE_PLAYING);
     }
 
     @Override
@@ -336,9 +371,10 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        stopMedia();
         if (mAudioIndex == mAudiosList.size() - 1)
-            stopSelf();
+            stopMedia();
+        else
+            skipToNext();
     }
 
     @Override
@@ -347,18 +383,12 @@ public class MediaPlayerService extends Service
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (mMediaPlayer == null)
                     initMediaPlayer();
-                else if (!mMediaPlayer.isPlaying())
-                    mMediaPlayer.start();
+                else
+                    playMedia();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                if (mMediaPlayer.isPlaying())
-                    mMediaPlayer.stop();
-                mMediaPlayer.release();
-                mMediaPlayer = null;
-                break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                if (mMediaPlayer.isPlaying())
-                    mMediaPlayer.pause();
+                pauseMedia();
                 break;
         }
     }
@@ -374,36 +404,6 @@ public class MediaPlayerService extends Service
                         .putString(MediaMetadata.METADATA_KEY_TITLE, mActiveAudio.getTitle())
                         .build()
         );
-    }
-
-    private void skipToPrevious() {
-        if (mAudioIndex == 0) {
-            mAudioIndex = mAudiosList.size() - 1;
-            mActiveAudio = mAudiosList.get(mAudioIndex);
-        } else {
-            mActiveAudio = mAudiosList.get(--mAudioIndex);
-        }
-
-        mStorageUtil.storeAudioIndex(mAudioIndex);
-
-        stopMedia();
-        mMediaPlayer.reset();
-        initMediaPlayer();
-    }
-
-    private void skipToNext() {
-        if (mAudioIndex == mAudiosList.size() - 1) {
-            mAudioIndex = 0;
-            mActiveAudio = mAudiosList.get(mAudioIndex);
-        } else {
-            mActiveAudio = mAudiosList.get(++mAudioIndex);
-        }
-
-        mStorageUtil.storeAudioIndex(mAudioIndex);
-
-        stopMedia();
-        mMediaPlayer.reset();
-        initMediaPlayer();
     }
 
     private void buildNotification(int playbackState) {
@@ -461,6 +461,9 @@ public class MediaPlayerService extends Service
                 break;
             case 3:
                 playbackAction.setAction(ACTION_PREVIOUS);
+                break;
+            case 4:
+                playbackAction.setAction(ACTION_STOP);
                 break;
         }
         return PendingIntent.getService(this, actionNumber, playbackAction, 0);
