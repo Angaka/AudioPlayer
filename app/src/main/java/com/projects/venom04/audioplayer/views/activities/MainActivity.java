@@ -20,6 +20,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,8 +42,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener
-            , IAudio {
+    implements NavigationView.OnNavigationItemSelectedListener
+        , IAudio {
+
+    private static final String TAG = "MainActivity";
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
@@ -139,7 +142,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mServiceBound) {
+        if (mServiceBound && isFinishing()) {
             unbindService(mServiceConnection);
             mMediaPlayerService.stopSelf();
         }
