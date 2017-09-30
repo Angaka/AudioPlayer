@@ -13,13 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.projects.venom04.audioplayer.R;
+import com.projects.venom04.audioplayer.controllers.AudioFileManager;
 import com.projects.venom04.audioplayer.models.interfaces.IAudio;
 import com.projects.venom04.audioplayer.models.interfaces.IRecyclerView;
-import com.projects.venom04.audioplayer.models.pojo.Audio;
-import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 import com.projects.venom04.audioplayer.views.adapters.AudiosAdapter;
-
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,16 +33,14 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
     RecyclerView mRvMusics;
 
     private AudiosAdapter mAdapter;
-    private ArrayList<Audio> mAudiosList;
 
     private IAudio mListener;
 
-    public static MusicsFragment newInstance(ArrayList<Audio> audiosList) {
+    public static MusicsFragment newInstance() {
 
         Bundle args = new Bundle();
 
         MusicsFragment fragment = new MusicsFragment();
-        args.putSerializable(AudioPlayerUtils.AUDIOS, audiosList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,10 +55,6 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mAudiosList = (ArrayList<Audio>) getArguments().getSerializable(AudioPlayerUtils.AUDIOS);
-        }
     }
 
     @Override
@@ -71,7 +62,8 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
         View view = inflater.inflate(R.layout.fragment_musics, container, false);
         ButterKnife.bind(this, view);
 
-        mAdapter = new AudiosAdapter(getContext(), mAudiosList, this);
+        AudioFileManager audioFileManager = AudioFileManager.getInstance();
+        mAdapter = new AudiosAdapter(getContext(), audioFileManager.loadAllAudios(getContext(), 0), this);
         
         mRvMusics.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());

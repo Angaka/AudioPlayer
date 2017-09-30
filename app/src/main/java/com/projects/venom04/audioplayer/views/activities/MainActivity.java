@@ -114,13 +114,12 @@ public class MainActivity extends AppCompatActivity
 
         mPreferences = getSharedPreferences(AudioPlayerUtils.PREFS, Context.MODE_PRIVATE);
 
-        mAudioFileManager = new AudioFileManager(this);
+        mAudioFileManager = AudioFileManager.getInstance();
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), MainActivity.this);
 
         if (!isAllPermissionsAccepted() && !mSnackBarPermissions.isShown()) {
             mSnackBarPermissions.show();
         } else {
-            mAudioFileManager.loadAllAudios();
             mViewPager.setAdapter(mPagerAdapter);
             mTabLayout.setupWithViewPager(mViewPager);
         }
@@ -251,7 +250,7 @@ public class MainActivity extends AppCompatActivity
     public void onSelectedAudioInList(int audioIndex) {
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
         if (!mServiceBound) {
-            storageUtil.storeAudios(mAudioFileManager.getAudiosList());
+            storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, 0));
             storageUtil.storeAudioIndex(audioIndex);
 
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
@@ -279,13 +278,13 @@ public class MainActivity extends AppCompatActivity
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
+                    return MusicsFragment.newInstance();
                 case 1:
-                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
+                    return MusicsFragment.newInstance();
                 case 2:
-                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
+                    return MusicsFragment.newInstance();
                 default:
-                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
+                    return MusicsFragment.newInstance();
             }
         }
 
