@@ -53,6 +53,6 @@ public class StorageUtil {
     public void clearCachedAudioPlaylist() {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
     }
 }

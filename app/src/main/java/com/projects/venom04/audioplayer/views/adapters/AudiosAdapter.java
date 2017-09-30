@@ -5,12 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.models.interfaces.IRecyclerView;
 import com.projects.venom04.audioplayer.models.pojo.Audio;
+import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 
 import java.util.ArrayList;
 
@@ -31,12 +31,14 @@ public class AudiosAdapter extends RecyclerView.Adapter<AudiosAdapter.ViewHolder
     private static IRecyclerView mListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.text_view_number)
+        TextView mTvNumber;
         @BindView(R.id.text_view_title)
         TextView mTvTitle;
         @BindView(R.id.text_view_artist)
         TextView mTvArtist;
-        @BindView(R.id.image_view_state)
-        ImageView mIvState;
+        @BindView(R.id.text_view_duration)
+        TextView mTvDuration;
 
         private ViewHolder(View view) {
             super(view);
@@ -60,9 +62,10 @@ public class AudiosAdapter extends RecyclerView.Adapter<AudiosAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Audio audio = mDataList.get(position);
 
+        holder.mTvNumber.setText(String.valueOf(position + 1));
         holder.mTvTitle.setText(audio.getTitle());
         holder.mTvArtist.setText(audio.getArtist());
-        //        holder.mIvState.setImageResource();
+        holder.mTvDuration.setText(AudioPlayerUtils.convertMsToHourFormat(audio.getDuration()));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

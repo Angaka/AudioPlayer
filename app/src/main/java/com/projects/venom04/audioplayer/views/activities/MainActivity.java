@@ -266,8 +266,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public class PagerAdapter extends FragmentPagerAdapter {
-        private final int PAGE_COUNT = 2;
-        private String mTabTitles[] = new String[] { "Musics", "Albums" };
+        private final int PAGE_COUNT = 3;
+        private int mTabTitles[] = new int[] { R.string.musics, R.string.albums, R.string.artists };
         private Context mContext;
 
         PagerAdapter(FragmentManager fm, Context context) {
@@ -282,6 +282,8 @@ public class MainActivity extends AppCompatActivity
                     return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
                 case 1:
                     return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
+                case 2:
+                    return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
                 default:
                     return MusicsFragment.newInstance(mAudioFileManager.getAudiosList());
             }
@@ -294,7 +296,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return mTabTitles[position];
+            return getString(mTabTitles[position]);
         }
     }
 }

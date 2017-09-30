@@ -19,13 +19,14 @@
             android:theme="@style/AppTheme.Toolbar"
             app:titleTextColor="@color/colorPrimaryDark"
             app:subtitleTextColor="@color/colorPrimaryDark"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:layout_scrollFlags="scroll|enterAlways"/>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabTextColor="@color/colorPrimaryDark"
+            app:tabTextColor="@color/colorPrimaryLight"
             app:tabSelectedTextColor="@color/colorAccent"
             app:tabGravity="fill"
             app:tabMode="fixed" />

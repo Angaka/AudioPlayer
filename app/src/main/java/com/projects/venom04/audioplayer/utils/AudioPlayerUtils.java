@@ -1,5 +1,8 @@
 package com.projects.venom04.audioplayer.utils;
 
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Venom on 25/09/2017.
  */
@@ -19,5 +22,13 @@ public class AudioPlayerUtils {
 
     public static boolean isLatin(String value) {
         return value.matches("[ \\w]+");
+    }
+
+    public static String convertMsToHourFormat(long ms) {
+        return String.format(Locale.getDefault(),
+                "%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(ms),
+                TimeUnit.MILLISECONDS.toSeconds(ms) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(ms)));
     }
 }

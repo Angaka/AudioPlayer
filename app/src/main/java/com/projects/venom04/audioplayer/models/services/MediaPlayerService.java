@@ -89,7 +89,8 @@ public class MediaPlayerService extends Service
                     stopMedia();
                     mMediaPlayer.reset();
                     initMediaPlayer();
-                    playMedia();
+                    updateMetaData();
+                    buildNotification(PlaybackState.STATE_PLAYING);
                     break;
                 case AudioManager.ACTION_AUDIO_BECOMING_NOISY:
                     pauseMedia();
@@ -371,10 +372,9 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        if (mAudioIndex == mAudiosList.size() - 1)
-            stopMedia();
-        else
-            skipToNext();
+        stopMedia();
+        stopSelf();
+        skipToNext();
     }
 
     @Override
