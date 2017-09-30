@@ -25,6 +25,7 @@ import android.support.v4.content.ContextCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.models.pojo.Audio;
@@ -407,38 +408,44 @@ public class MediaPlayerService extends Service
     }
 
     private void buildNotification(int playbackState) {
-        int notificationAction = android.R.drawable.ic_media_pause;
+        int notificationAction = R.drawable.ic_pause;
         PendingIntent playPauseAction = null;
 
         switch (playbackState) {
             case PlaybackState.STATE_PLAYING:
-                notificationAction = android.R.drawable.ic_media_pause;
+                notificationAction = R.drawable.ic_pause;
                 playPauseAction = playbackAction(1);
                 break;
             case PlaybackState.STATE_PAUSED:
-                notificationAction = android.R.drawable.ic_media_play;
+                notificationAction = R.drawable.ic_play;
                 playPauseAction = playbackAction(0);
                 break;
         }
 
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_background);
+        RemoteViews customNotificationView = new RemoteViews(getPackageName(), R.layout.custom_notification_view);
 
-        Notification.Builder notification = new Notification.Builder(this)
-                .setShowWhen(false)
-                .setStyle(new Notification.MediaStyle()
-                        .setMediaSession(mMediaSession.getSessionToken())
-                        .setShowActionsInCompactView(0, 1, 2))
-                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
+        customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.ic_music);
+        customNotificationView.setTextViewText(R.id.text_view_title, mActiveAudio.getTitle());
+        customNotificationView.setTextViewText(R.id.text_view_artist, mActiveAudio.getArtist());
+        customNotificationView.setImageViewResource(R.id.image_button_previous, R.drawable.ic_skip_to_previous);
+        customNotificationView.setOnClickPendingIntent(R.id.image_button_previous, playbackAction(3));
+        customNotificationView.setImageViewResource(R.id.image_button_play, notificationAction);
+        customNotificationView.setOnClickPendingIntent(R.id.image_button_play, playPauseAction);
+        customNotificationView.setImageViewResource(R.id.image_button_next, R.drawable.ic_skip_to_next);
+        customNotificationView.setOnClickPendingIntent(R.id.image_button_next, playbackAction(2));
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_music);
+        Notification notification = new Notification.Builder(this)
+                .setAutoCancel(true)
+                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimaryDark))
+                .setSmallIcon(R.drawable.ic_music)
                 .setLargeIcon(largeIcon)
-                .setSmallIcon(android.R.drawable.stat_sys_headset)
-                .setContentText(mActiveAudio.getArtist())
-                .setContentTitle(mActiveAudio.getAlbum())
-                .setContentInfo(mActiveAudio.getTitle())
-                .addAction(android.R.drawable.ic_media_previous, "previous", playbackAction(3))
-                .addAction(notificationAction, "pause", playPauseAction)
-                .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2));
+                .setContent(customNotificationView)
+                .build();
+        notification.contentView = customNotificationView;
+        notification.bigContentView = customNotificationView;
 
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notification.build());
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notification);
     }
 
     private void removeNotification() {

@@ -11,4 +11,11 @@
     <string name="musics">Musics</string>
     <string name="albums">Albums</string>
     <string name="artists">Artists</string>
+
+    <!-- Notification -->
+    <string name="previous">Previous</string>
+    <string name="play">Play</string>
+    <string name="next">Next</string>
+    <string name="cover">Cover</string>
+    <!-- Notification END -->
 </resources>
