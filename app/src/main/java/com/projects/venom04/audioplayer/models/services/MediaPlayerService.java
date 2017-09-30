@@ -424,7 +424,7 @@ public class MediaPlayerService extends Service
 
         RemoteViews customNotificationView = new RemoteViews(getPackageName(), R.layout.custom_notification_view);
 
-        customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.ic_music);
+        customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.background_default_album);
         customNotificationView.setTextViewText(R.id.text_view_title, mActiveAudio.getTitle());
         customNotificationView.setTextViewText(R.id.text_view_artist, mActiveAudio.getArtist());
         customNotificationView.setImageViewResource(R.id.image_button_previous, R.drawable.ic_skip_to_previous);

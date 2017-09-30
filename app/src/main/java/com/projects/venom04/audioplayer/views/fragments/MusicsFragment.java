@@ -63,7 +63,7 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
         ButterKnife.bind(this, view);
 
         AudioFileManager audioFileManager = AudioFileManager.getInstance();
-        mAdapter = new AudiosAdapter(getContext(), audioFileManager.loadAllAudios(getContext(), 0), this);
+        mAdapter = new AudiosAdapter(getContext(), audioFileManager.loadAllAudios(getContext(), null), this);
         
         mRvMusics.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());

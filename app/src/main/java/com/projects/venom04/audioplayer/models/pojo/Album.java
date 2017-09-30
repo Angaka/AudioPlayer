@@ -21,4 +21,55 @@ public class Album {
         this.cover = cover;
         this.audios = audios;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public String getCover() {
+        return cover;
+    }
+
+    public void setCover(String cover) {
+        this.cover = cover;
+    }
+
+    public ArrayList<Audio> getAudios() {
+        return audios;
+    }
+
+    public void setAudios(ArrayList<Audio> audios) {
+        this.audios = audios;
+    }
+
+    @Override
+    public String toString() {
+        return "Album{" +
+                "id='" + id + '\'' +
+                ", artist='" + artist + '\'' +
+                ", album='" + album + '\'' +
+                ", cover='" + cover + '\'' +
+                ", audios=" + audios +
+                '}';
+    }
 }

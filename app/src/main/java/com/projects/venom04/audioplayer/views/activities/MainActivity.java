@@ -32,6 +32,7 @@ import com.projects.venom04.audioplayer.models.services.MediaPlayerService;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 import com.projects.venom04.audioplayer.utils.PermissionsService;
 import com.projects.venom04.audioplayer.utils.StorageUtil;
+import com.projects.venom04.audioplayer.views.fragments.AlbumsFragment;
 import com.projects.venom04.audioplayer.views.fragments.MusicsFragment;
 
 import java.util.ArrayList;
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity
     public void onSelectedAudioInList(int audioIndex) {
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
         if (!mServiceBound) {
-            storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, 0));
+            storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, null));
             storageUtil.storeAudioIndex(audioIndex);
 
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
@@ -280,7 +281,7 @@ public class MainActivity extends AppCompatActivity
                 case 0:
                     return MusicsFragment.newInstance();
                 case 1:
-                    return MusicsFragment.newInstance();
+                    return AlbumsFragment.newInstance();
                 case 2:
                     return MusicsFragment.newInstance();
                 default:

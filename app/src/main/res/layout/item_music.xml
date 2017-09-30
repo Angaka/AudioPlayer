@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:fontFamily="sans-serif-ligh"
+            android:fontFamily="sans-serif-light"
             android:maxLines="1"
             android:singleLine="true"
             android:text="Artist"

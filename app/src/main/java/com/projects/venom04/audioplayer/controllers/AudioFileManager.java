@@ -33,13 +33,12 @@ public class AudioFileManager {
         String[] projection = {
                 MediaStore.Audio.Albums._ID,
                 MediaStore.Audio.Albums.ARTIST,
-                MediaStore.Audio.Albums.ALBUM_ID,
                 MediaStore.Audio.Albums.ALBUM,
                 MediaStore.Audio.Albums.ALBUM_ART,
         };
 
         Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                 projection,
                 null,
                 null,
@@ -48,11 +47,10 @@ public class AudioFileManager {
             while (cursor.moveToNext()) {
                 String id = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums._ID));
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST));
-                int albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ID));
                 String albumName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM));
                 String cover = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART));
 
-                Album album = new Album(id, artist, albumName, cover, loadAllAudios(context, albumId));
+                Album album = new Album(id, artist, albumName, cover, loadAllAudios(context, id));
                 albumsList.add(album);
             }
         }
@@ -60,11 +58,11 @@ public class AudioFileManager {
         return albumsList;
     }
 
-    public ArrayList<Audio> loadAllAudios(Context context, int albumId) {
+    public ArrayList<Audio> loadAllAudios(Context context, String albumId) {
         ArrayList<Audio> audiosList = new ArrayList<>();
 
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
-        if (albumId != 0)
+        if (albumId != null)
             selection = selection + " AND " + MediaStore.Audio.Albums.ALBUM_ID + " = " + albumId;
         String[] projection = {
                 MediaStore.Audio.Media._ID, // Uri id of the file
