@@ -45,7 +45,6 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
         return fragment;
     }
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

@@ -1,7 +1,6 @@
 package com.projects.venom04.audioplayer.models.services;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -159,7 +158,7 @@ public class MediaPlayerService extends Service
         removeAudioFocus();
         if (mPhoneStateListener != null)
             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
-        removeNotification();
+        stopForeground(true);
         unregisterReceiver(mReceiver);
 
         mStorageUtil.clearCachedAudioPlaylist();
@@ -246,7 +245,7 @@ public class MediaPlayerService extends Service
             @Override
             public void onStop() {
                 super.onStop();
-                removeNotification();
+                stopForeground(true);
                 stopSelf();
             }
 
@@ -445,12 +444,7 @@ public class MediaPlayerService extends Service
         notification.contentView = customNotificationView;
         notification.bigContentView = customNotificationView;
 
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notification);
-    }
-
-    private void removeNotification() {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(NOTIFICATION_ID);
+        startForeground(NOTIFICATION_ID, notification);
     }
 
     private PendingIntent playbackAction(int actionNumber) {

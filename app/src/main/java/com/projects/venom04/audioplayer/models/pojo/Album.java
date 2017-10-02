@@ -1,12 +1,13 @@
 package com.projects.venom04.audioplayer.models.pojo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Venom on 30/09/2017.
  */
 
-public class Album {
+public class Album implements Serializable {
 
     private String id;
     private String artist;

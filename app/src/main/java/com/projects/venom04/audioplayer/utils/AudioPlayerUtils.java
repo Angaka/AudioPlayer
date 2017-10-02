@@ -15,6 +15,7 @@ public class AudioPlayerUtils {
 
     public static final String MEDIA = "media";
     public static final String AUDIOS = "audios";
+    public static final String ALBUMS = "albums";
 
     public static final String SERVICE_STATE = "service_state";
 
