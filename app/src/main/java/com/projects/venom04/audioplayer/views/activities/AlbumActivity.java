@@ -1,9 +1,9 @@
 package com.projects.venom04.audioplayer.views.activities;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +16,7 @@ import com.projects.venom04.audioplayer.models.interfaces.IRecyclerView;
 import com.projects.venom04.audioplayer.models.pojo.Album;
 import com.projects.venom04.audioplayer.models.pojo.Audio;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
+import com.projects.venom04.audioplayer.utils.StorageUtil;
 import com.projects.venom04.audioplayer.views.adapters.AudiosAdapter;
 import com.squareup.picasso.Picasso;
 
@@ -28,7 +29,7 @@ import butterknife.ButterKnife;
  * Created by Venom on 01/10/2017.
  */
 
-public class AlbumActivity extends AppCompatActivity implements IRecyclerView {
+public class AlbumActivity extends BaseActivity implements IRecyclerView {
 
     private static final String TAG = "AlbumActivity";
 
@@ -75,6 +76,13 @@ public class AlbumActivity extends AppCompatActivity implements IRecyclerView {
 
     @Override
     public void onItemClicked(View view, int position) {
+        StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+        storageUtil.clearCachedAudioPlaylist();
+        storageUtil.storeAudios(mAudiosList);
+        storageUtil.storeAudioIndex(position);
+
+        Intent broadcastIntent = new Intent(AudioPlayerUtils.PLAY_NEW_AUDIO);
+        sendBroadcast(broadcastIntent);
 
     }
 }

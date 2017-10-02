@@ -7,7 +7,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +62,7 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
 
         AudioFileManager audioFileManager = AudioFileManager.getInstance();
         mAdapter = new AudiosAdapter(getContext(), audioFileManager.loadAllAudios(getContext(), null), this);
-        
+
         mRvMusics.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -73,13 +72,11 @@ public class MusicsFragment extends Fragment implements IRecyclerView {
         dividerItemDecoration.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.divider));
         mRvMusics.addItemDecoration(dividerItemDecoration);
         mRvMusics.setAdapter(mAdapter);
-
         return view;
     }
 
     @Override
     public void onItemClicked(View view, int position) {
-        Log.d(TAG, "onItemClicked: " + position);
         mListener.onSelectedAudioInList(position);
     }
 }

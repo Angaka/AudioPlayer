@@ -34,6 +34,13 @@ import com.projects.venom04.audioplayer.utils.StorageUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.projects.venom04.audioplayer.utils.AudioPlayerUtils.ACTION_NEXT;
+import static com.projects.venom04.audioplayer.utils.AudioPlayerUtils.ACTION_PAUSE;
+import static com.projects.venom04.audioplayer.utils.AudioPlayerUtils.ACTION_PLAY;
+import static com.projects.venom04.audioplayer.utils.AudioPlayerUtils.ACTION_PREVIOUS;
+import static com.projects.venom04.audioplayer.utils.AudioPlayerUtils.ACTION_STOP;
+import static com.projects.venom04.audioplayer.utils.AudioPlayerUtils.NOTIFICATION_ID;
+
 /**
  * Created by Venom on 25/09/2017.
  */
@@ -46,19 +53,11 @@ public class MediaPlayerService extends Service
 
     private static final String TAG = "MediaPlayerService";
 
-    public static final String ACTION_PLAY = "com.projects.venom04.audioplayer.ACTION_PLAY";
-    public static final String ACTION_PAUSE = "com.projects.venom04.audioplayer.ACTION_PAUSE";
-    public static final String ACTION_PREVIOUS = "com.projects.venom04.audioplayer.ACTION_PREVIOUS";
-    public static final String ACTION_NEXT = "com.projects.venom04.audioplayer.ACTION_NEXT";
-    public static final String ACTION_STOP = "com.projects.venom04.audioplayer.ACTION_STOP";
-
     private final IBinder mBinder = new LocalBinder();
 
     private MediaSessionManager mMediaSessionManager;
     private MediaSession mMediaSession;
     private MediaController.TransportControls mTransportsControls;
-
-    private static final int NOTIFICATION_ID = 101;
 
     private MediaPlayer mMediaPlayer;
     private AudioManager mAudioManager;
@@ -79,15 +78,31 @@ public class MediaPlayerService extends Service
 
             switch (intent.getAction()) {
                 case AudioPlayerUtils.PLAY_NEW_AUDIO:
-                    mAudioIndex = new StorageUtil(getApplicationContext()).loadAudioIndex();
-                    if (mAudioIndex != -1 && mAudioIndex < mAudiosList.size()) {
-                        mActiveAudio = mAudiosList.get(mAudioIndex);
-                    } else {
+                    try {
+                        mAudiosList = mStorageUtil.loadAudios();
+                        mAudioIndex = mStorageUtil.loadAudioIndex();
+
+                        if (mAudioIndex != -1 && mAudioIndex < mAudiosList.size())
+                            mActiveAudio = mAudiosList.get(mAudioIndex);
+                        else
+                            stopSelf();
+                    } catch (NullPointerException e) {
                         stopSelf();
                     }
 
+                    if (!requestAudioFocus())
+                        stopSelf();
+
+                    if (mMediaSessionManager == null) {
+                        try {
+                            initMediaSession();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                            stopSelf();
+                        }
+                    }
+
                     stopMedia();
-                    mMediaPlayer.reset();
                     initMediaPlayer();
                     updateMetaData();
                     buildNotification(PlaybackState.STATE_PLAYING);
@@ -110,42 +125,17 @@ public class MediaPlayerService extends Service
         super.onCreate();
         callStateListener();
 
+        mStorageUtil = new StorageUtil(getApplicationContext());
+
         IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         intentFilter.addAction(AudioPlayerUtils.PLAY_NEW_AUDIO);
         registerReceiver(mReceiver, intentFilter);
-
-        try {
-            mStorageUtil = new StorageUtil(getApplicationContext());
-            mAudiosList = mStorageUtil.loadAudios();
-            mAudioIndex = mStorageUtil.loadAudioIndex();
-
-            if (mAudioIndex != -1 && mAudioIndex < mAudiosList.size())
-                mActiveAudio = mAudiosList.get(mAudioIndex);
-            else
-                stopSelf();
-        } catch (NullPointerException e) {
-            stopSelf();
-        }
-
-        if (!requestAudioFocus())
-            stopSelf();
-
-        if (mMediaSessionManager == null) {
-            try {
-                initMediaSession();
-                initMediaPlayer();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                stopSelf();
-            }
-            buildNotification(PlaybackState.STATE_PLAYING);
-        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         handleIncomingActions(intent);
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
@@ -372,8 +362,6 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        stopMedia();
-        stopSelf();
         skipToNext();
     }
 
@@ -434,6 +422,7 @@ public class MediaPlayerService extends Service
         customNotificationView.setOnClickPendingIntent(R.id.image_button_next, playbackAction(2));
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_music);
+
         Notification notification = new Notification.Builder(this)
                 .setAutoCancel(true)
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimaryDark))
@@ -441,6 +430,7 @@ public class MediaPlayerService extends Service
                 .setLargeIcon(largeIcon)
                 .setContent(customNotificationView)
                 .build();
+
         notification.contentView = customNotificationView;
         notification.bigContentView = customNotificationView;
 

@@ -28,7 +28,7 @@ public class AudiosAdapter extends RecyclerView.Adapter<AudiosAdapter.ViewHolder
     private Context mContext;
     private ArrayList<Audio> mDataList;
 
-    private static IRecyclerView mListener;
+    private IRecyclerView mListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.text_view_number)

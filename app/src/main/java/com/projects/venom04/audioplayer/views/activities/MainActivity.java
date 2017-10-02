@@ -1,12 +1,9 @@
 package com.projects.venom04.audioplayer.views.activities;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -18,17 +15,15 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.controllers.AudioFileManager;
 import com.projects.venom04.audioplayer.models.interfaces.IAudio;
-import com.projects.venom04.audioplayer.models.services.MediaPlayerService;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 import com.projects.venom04.audioplayer.utils.PermissionsService;
 import com.projects.venom04.audioplayer.utils.StorageUtil;
@@ -41,8 +36,8 @@ import java.util.Arrays;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity
-    implements NavigationView.OnNavigationItemSelectedListener
+public class MainActivity extends BaseActivity
+        implements NavigationView.OnNavigationItemSelectedListener
         , IAudio {
 
     private static final String TAG = "MainActivity";
@@ -62,26 +57,8 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences mPreferences;
     private Snackbar mSnackBarPermissions;
 
-    private MediaPlayerService mMediaPlayerService;
-    private boolean mServiceBound = false;
-
     private AudioFileManager mAudioFileManager;
     private PagerAdapter mPagerAdapter;
-
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) iBinder;
-            mMediaPlayerService = binder.getService();
-            mServiceBound = true;
-            Toast.makeText(MainActivity.this, "Service bound", Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mServiceBound = false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,23 +105,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(AudioPlayerUtils.SERVICE_STATE, mServiceBound);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mServiceBound = savedInstanceState.getBoolean(AudioPlayerUtils.SERVICE_STATE);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mServiceBound && isFinishing()) {
-            unbindService(mServiceConnection);
-            mMediaPlayerService.stopSelf();
-        }
     }
 
     @Override
@@ -249,25 +220,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSelectedAudioInList(int audioIndex) {
+        Log.d(TAG, "onSelectedAudioInList: " + mAudioFileManager.loadAllAudios(this, null).get(audioIndex).toString());
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-        if (!mServiceBound) {
-            storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, null));
-            storageUtil.storeAudioIndex(audioIndex);
+        storageUtil.clearCachedAudioPlaylist();
+        storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, null));
+        storageUtil.storeAudioIndex(audioIndex);
 
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            startService(playerIntent);
-            bindService(playerIntent, mServiceConnection, BIND_AUTO_CREATE);
-        } else {
-            storageUtil.storeAudioIndex(audioIndex);
-
-            Intent broadcastIntent = new Intent(AudioPlayerUtils.PLAY_NEW_AUDIO);
-            sendBroadcast(broadcastIntent);
-        }
+        Intent broadcastIntent = new Intent(AudioPlayerUtils.PLAY_NEW_AUDIO);
+        sendBroadcast(broadcastIntent);
     }
 
     public class PagerAdapter extends FragmentPagerAdapter {
         private final int PAGE_COUNT = 3;
-        private int mTabTitles[] = new int[] { R.string.musics, R.string.albums, R.string.artists };
+        private int mTabTitles[] = new int[]{R.string.musics, R.string.albums, R.string.artists};
         private Context mContext;
 
         PagerAdapter(FragmentManager fm, Context context) {
@@ -277,6 +242,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public Fragment getItem(int position) {
+            Log.d(TAG, "getItem: " + position);
             switch (position) {
                 case 0:
                     return MusicsFragment.newInstance();

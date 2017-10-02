@@ -3,7 +3,6 @@ package com.projects.venom04.audioplayer.views.adapters;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
     private Context mContext;
     private ArrayList<Album> mDataList;
 
-    private static IRecyclerView mListener;
+    private IRecyclerView mListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.image_view_cover)
@@ -63,7 +62,6 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Album album = mDataList.get(position);
 
-        Log.d(TAG, "onBindViewHolder: " + album.getCover());
         Picasso.with(mContext).load(Uri.parse("file://" + album.getCover())).into(holder.mIvCover);
         holder.mTvAlbum.setText(album.getAlbum());
         holder.mTvArtist.setText(album.getArtist());
