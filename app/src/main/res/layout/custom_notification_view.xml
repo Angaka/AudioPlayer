@@ -2,84 +2,102 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
-    android:orientation="horizontal"
-    android:padding="@dimen/default_padding"
-    android:weightSum="10">
+    android:orientation="vertical"
+    android:padding="@dimen/default_padding">
+
+    <ImageButton
+        android:id="@+id/image_button_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/close"
+        app:srcCompat="@drawable/ic_close" />
 
     <LinearLayout
-        android:layout_width="0dip"
-        android:layout_height="wrap_content"
-        android:layout_weight="8"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/text_view_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="@dimen/text_size_title" />
-
-        <TextView
-            android:id="@+id/text_view_artist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif-ligh"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:textColor="@color/colorPrimaryLight"
-            android:textSize="@dimen/text_size_artist" />
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_height="80dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="10">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_padding"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_weight="8"
+            android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/image_button_previous"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/text_view_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/previous"
-                app:srcCompat="@drawable/ic_skip_to_previous" />
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="@dimen/text_size_title" />
 
-            <ImageButton
-                android:id="@+id/image_button_play"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/text_view_artist"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:layout_marginStart="20dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/play"
-                app:srcCompat="@drawable/ic_play" />
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-ligh"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/colorPrimaryLight"
+                android:textSize="@dimen/text_size_artist" />
 
-            <ImageButton
-                android:id="@+id/image_button_next"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/next"
-                app:srcCompat="@drawable/ic_skip_to_next" />
+                android:layout_marginTop="@dimen/default_padding"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/image_button_previous"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/previous"
+                    app:srcCompat="@drawable/ic_skip_to_previous" />
+
+                <ImageButton
+                    android:id="@+id/image_button_play"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/play"
+                    app:srcCompat="@drawable/ic_play" />
+
+                <ImageButton
+                    android:id="@+id/image_button_next"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/next"
+                    app:srcCompat="@drawable/ic_skip_to_next" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
-    <ImageView
-        android:id="@+id/image_view_cover"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="2"
-        android:contentDescription="@string/cover"
-        app:srcCompat="@drawable/ic_music" />
+        <ImageView
+            android:id="@+id/image_view_cover"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="2"
+            android:contentDescription="@string/cover"
+            app:srcCompat="@drawable/ic_music" />
+
+    </LinearLayout>
 
 </LinearLayout>

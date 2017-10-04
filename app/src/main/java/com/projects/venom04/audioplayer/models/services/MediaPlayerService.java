@@ -236,7 +236,7 @@ public class MediaPlayerService extends Service
             public void onStop() {
                 super.onStop();
                 stopForeground(true);
-                stopSelf();
+                stopMedia();
             }
 
             @Override
@@ -281,7 +281,6 @@ public class MediaPlayerService extends Service
         if (mMediaPlayer == null) return;
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
-            buildNotification(PlaybackState.STATE_PAUSED);
         }
     }
 
@@ -411,6 +410,8 @@ public class MediaPlayerService extends Service
 
         RemoteViews customNotificationView = new RemoteViews(getPackageName(), R.layout.custom_notification_view);
 
+        customNotificationView.setImageViewResource(R.id.image_button_close, R.drawable.ic_close);
+        customNotificationView.setOnClickPendingIntent(R.id.image_button_close, playbackAction(4));
         customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.background_default_album);
         customNotificationView.setTextViewText(R.id.text_view_title, mActiveAudio.getTitle());
         customNotificationView.setTextViewText(R.id.text_view_artist, mActiveAudio.getArtist());

@@ -13,6 +13,7 @@
     <string name="artists">Artists</string>
 
     <!-- Notification -->
+    <string name="close">Close</string>
     <string name="previous">Previous</string>
     <string name="play">Play</string>
     <string name="next">Next</string>

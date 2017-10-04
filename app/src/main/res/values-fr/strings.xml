@@ -13,6 +13,7 @@
     <string name="artists">Artistes</string>
 
     <!-- Notification -->
+    <string name="close">Fermer</string>
     <string name="previous">Précédent</string>
     <string name="play">Lancer</string>
     <string name="next">Suivant</string>
