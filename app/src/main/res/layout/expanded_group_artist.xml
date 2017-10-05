@@ -3,10 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:minHeight="65dp"
+    android:minHeight="50dp"
     android:orientation="vertical"
     android:paddingEnd="@dimen/default_padding"
-    android:paddingStart="@dimen/default_padding">
+    android:paddingStart="30dp">
 
     <TextView
         android:id="@+id/text_view_artist"

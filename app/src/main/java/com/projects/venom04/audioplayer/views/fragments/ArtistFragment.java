@@ -1,5 +1,6 @@
 package com.projects.venom04.audioplayer.views.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,6 +14,8 @@ import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.controllers.AudioFileManager;
 import com.projects.venom04.audioplayer.models.pojo.Album;
 import com.projects.venom04.audioplayer.models.pojo.Artist;
+import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
+import com.projects.venom04.audioplayer.views.activities.AlbumActivity;
 import com.projects.venom04.audioplayer.views.adapters.ExpandableArtistsAdapter;
 
 import java.util.ArrayList;
@@ -26,7 +29,8 @@ import butterknife.ButterKnife;
  * Created by Venom on 04/10/2017.
  */
 
-public class ArtistFragment extends Fragment {
+public class ArtistFragment extends Fragment
+        implements ExpandableListView.OnChildClickListener {
 
     private static final String TAG = "ArtistFragment";
 
@@ -63,10 +67,7 @@ public class ArtistFragment extends Fragment {
         initData();
         mAdapter = new ExpandableArtistsAdapter(getContext(), mHeaderDataList, mChildDataMap);
         mExpLvArtists.setAdapter(mAdapter);
-
-        for (int i = 0; i < mAdapter.getGroupCount(); i++) {
-            mExpLvArtists.expandGroup(i);
-        }
+        mExpLvArtists.setOnChildClickListener(this);
 
         return view;
     }
@@ -78,9 +79,16 @@ public class ArtistFragment extends Fragment {
         for (Artist artist : artistsList) {
             mHeaderDataList.add(artist);
             mChildDataMap.put(artist, artist.getAlbums());
-            Log.d(TAG, "artist: " + artist.getArtist());
-            for (Album album : artist.getAlbums())
-                Log.d(TAG, "album: " + album.getAlbum());
         }
+    }
+
+    @Override
+    public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long l) {
+        Album album = mChildDataMap.get(mHeaderDataList.get(groupPosition)).get(childPosition);
+
+        Intent intent = new Intent(getActivity(), AlbumActivity.class);
+        intent.putExtra(AudioPlayerUtils.ALBUMS, album);
+        startActivity(intent);
+        return false;
     }
 }

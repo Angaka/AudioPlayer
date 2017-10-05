@@ -21,5 +21,6 @@
 
     <!-- ArtistsFragment -->
     <string name="artist.song.total">%d chansons</string>
+    <string name="artist.song.total.out_of">%d chansons sur %d</string>
     <!-- ArtistsFragment END -->
 </resources>

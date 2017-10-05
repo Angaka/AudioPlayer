@@ -5,7 +5,7 @@
     android:layout_height="160dp"
     android:layout_margin="2dp"
     app:cardBackgroundColor="@color/colorPrimary"
-    app:cardCornerRadius="2dp"
+    app:cardCornerRadius="5dp"
     app:cardMaxElevation="0dp">
 
     <ImageView

@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.models.pojo.Album;
 import com.projects.venom04.audioplayer.models.pojo.Artist;
@@ -46,7 +46,7 @@ public class ExpandableArtistsAdapter extends BaseExpandableListAdapter {
 
     static class ViewChildHolder {
         @BindView(R.id.image_view_cover)
-        ImageView mIvCover;
+        RoundedImageView mIvCover;
         @BindView(R.id.text_view_album)
         TextView mTvAlbum;
         @BindView(R.id.text_view_audios_nb)
@@ -132,15 +132,22 @@ public class ExpandableArtistsAdapter extends BaseExpandableListAdapter {
             holder = (ViewChildHolder) convertView.getTag();
         }
 
-        Picasso.with(mContext).load(Uri.parse("file://" + album.getCover())).into(holder.mIvCover);
+        if (album.getCover() != null)
+            Picasso.with(mContext).load(Uri.parse("file://" + album.getCover())).into(holder.mIvCover);
+        else
+            holder.mIvCover.setImageResource(R.drawable.background_default_album);
         holder.mTvAlbum.setText(album.getAlbum());
-        holder.mTvAudiosNb.setText(String.format(mContext.getString(R.string.artist_song_total), album.getAudios().size()));
+
+        if (Integer.valueOf(album.getNumSongsForArtist()) == album.getAudios().size())
+            holder.mTvAudiosNb.setText(String.format(mContext.getString(R.string.artist_song_total), album.getAudios().size()));
+        else
+            holder.mTvAudiosNb.setText(String.format(mContext.getString(R.string.artist_song_total_out_of), Integer.valueOf(album.getNumSongsForArtist()), album.getAudios().size()));
 
         return convertView;
     }
 
     @Override
-    public boolean isChildSelectable(int i, int i1) {
-        return false;
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return true;
     }
 }
