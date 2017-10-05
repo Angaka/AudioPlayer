@@ -18,4 +18,8 @@
     <string name="play">Lancer</string>
     <string name="next">Suivant</string>
     <!-- Notification END -->
+
+    <!-- ArtistsFragment -->
+    <string name="artist.song.total">%d chansons</string>
+    <!-- ArtistsFragment END -->
 </resources>

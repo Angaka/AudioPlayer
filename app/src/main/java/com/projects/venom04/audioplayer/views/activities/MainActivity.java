@@ -28,6 +28,7 @@ import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 import com.projects.venom04.audioplayer.utils.PermissionsService;
 import com.projects.venom04.audioplayer.utils.StorageUtil;
 import com.projects.venom04.audioplayer.views.fragments.AlbumsFragment;
+import com.projects.venom04.audioplayer.views.fragments.ArtistFragment;
 import com.projects.venom04.audioplayer.views.fragments.MusicsFragment;
 
 import java.util.ArrayList;
@@ -220,7 +221,6 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onSelectedAudioInList(int audioIndex) {
-        Log.d(TAG, "onSelectedAudioInList: " + mAudioFileManager.loadAllAudios(this, null).get(audioIndex).toString());
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
         storageUtil.clearCachedAudioPlaylist();
         storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, null));
@@ -249,7 +249,7 @@ public class MainActivity extends BaseActivity
                 case 1:
                     return AlbumsFragment.newInstance();
                 case 2:
-                    return MusicsFragment.newInstance();
+                    return ArtistFragment.newInstance();
                 default:
                     return MusicsFragment.newInstance();
             }

@@ -14,6 +14,7 @@ public class Album implements Serializable {
     private String album;
     private String cover;
     private ArrayList<Audio> audios;
+    private String numSongsForArtist;
 
     public Album(String id, String artist, String album, String cover, ArrayList<Audio> audios) {
         this.id = id;
@@ -21,6 +22,15 @@ public class Album implements Serializable {
         this.album = album;
         this.cover = cover;
         this.audios = audios;
+    }
+
+    public Album(String id, String artist, String album, String cover, ArrayList<Audio> audios, String numSongsForArtist) {
+        this.id = id;
+        this.artist = artist;
+        this.album = album;
+        this.cover = cover;
+        this.audios = audios;
+        this.numSongsForArtist = numSongsForArtist;
     }
 
     public String getId() {
@@ -61,6 +71,14 @@ public class Album implements Serializable {
 
     public void setAudios(ArrayList<Audio> audios) {
         this.audios = audios;
+    }
+
+    public String getNumSongsForArtist() {
+        return numSongsForArtist;
+    }
+
+    public void setNumSongsForArtist(String numSongsForArtist) {
+        this.numSongsForArtist = numSongsForArtist;
     }
 
     @Override

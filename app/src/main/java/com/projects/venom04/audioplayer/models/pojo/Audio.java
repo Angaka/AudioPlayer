@@ -10,15 +10,19 @@ public class Audio implements Serializable {
 
     private long id;
     private String path;
+    private String artistId;
     private String artist;
+    private String albumId;
     private String album;
     private String title;
     private long duration;
 
-    public Audio(long id, String path, String artist, String album, String title, long duration) {
+    public Audio(long id, String path, String artistId, String artist, String albumId, String album, String title, long duration) {
         this.id = id;
         this.path = path;
+        this.artistId = artistId;
         this.artist = artist;
+        this.albumId = albumId;
         this.album = album;
         this.title = title;
         this.duration = duration;
@@ -40,12 +44,28 @@ public class Audio implements Serializable {
         this.path = path;
     }
 
+    public String getArtistId() {
+        return artistId;
+    }
+
+    public void setArtistId(String artistId) {
+        this.artistId = artistId;
+    }
+
     public String getArtist() {
         return artist;
     }
 
     public void setArtist(String artist) {
         this.artist = artist;
+    }
+
+    public String getAlbumId() {
+        return albumId;
+    }
+
+    public void setAlbumId(String albumId) {
+        this.albumId = albumId;
     }
 
     public String getAlbum() {

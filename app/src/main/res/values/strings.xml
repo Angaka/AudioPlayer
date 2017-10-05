@@ -19,4 +19,9 @@
     <string name="next">Next</string>
     <string name="cover">Cover</string>
     <!-- Notification END -->
+
+    <!-- ArtistsFragment -->
+    <string name="artist.album.total">%d albums</string>
+    <string name="artist.song.total">%d songs</string>
+    <!-- ArtistsFragment END -->
 </resources>
