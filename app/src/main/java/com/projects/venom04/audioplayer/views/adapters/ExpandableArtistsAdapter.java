@@ -135,7 +135,7 @@ public class ExpandableArtistsAdapter extends BaseExpandableListAdapter {
         if (album.getCover() != null)
             Picasso.with(mContext).load(Uri.parse("file://" + album.getCover())).into(holder.mIvCover);
         else
-            holder.mIvCover.setImageResource(R.drawable.background_default_album);
+            holder.mIvCover.setImageResource(R.drawable.cover_default);
         holder.mTvAlbum.setText(album.getAlbum());
 
         if (Integer.valueOf(album.getNumSongsForArtist()) == album.getAudios().size())

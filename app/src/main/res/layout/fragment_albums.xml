@@ -4,5 +4,5 @@
     android:id="@+id/recycler_view_albums"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="3dp"
+    android:padding="5dp"
     android:orientation="vertical" />

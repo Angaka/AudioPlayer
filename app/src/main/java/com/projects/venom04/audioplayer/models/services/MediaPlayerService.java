@@ -412,7 +412,7 @@ public class MediaPlayerService extends Service
 
         customNotificationView.setImageViewResource(R.id.image_button_close, R.drawable.ic_close);
         customNotificationView.setOnClickPendingIntent(R.id.image_button_close, playbackAction(4));
-        customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.background_default_album);
+        customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.cover_default);
         customNotificationView.setTextViewText(R.id.text_view_title, mActiveAudio.getTitle());
         customNotificationView.setTextViewText(R.id.text_view_artist, mActiveAudio.getArtist());
         customNotificationView.setImageViewResource(R.id.image_button_previous, R.drawable.ic_skip_to_previous);
