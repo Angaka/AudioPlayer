@@ -61,6 +61,8 @@ public class MainActivity extends BaseActivity
 
 
     // Audio Player Bottom bar
+    @BindView(R.id.view_audio_player)
+    View mViewAudioPlayer;
     @BindView(R.id.text_view_title)
     TextView mTvTitle;
     @BindView(R.id.text_view_artist)
@@ -72,11 +74,16 @@ public class MainActivity extends BaseActivity
     @BindView(R.id.image_button_next)
     ImageButton mIvNext;
 
+    private boolean mIsPlayerPaused = false;
+
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case AudioPlayerUtils.MEDIA:
+                    if (mViewAudioPlayer.getVisibility() == View.GONE)
+                        mViewAudioPlayer.setVisibility(View.VISIBLE);
+
                     Audio audio = (Audio) intent.getSerializableExtra(AudioPlayerUtils.MEDIA);
                     mTvTitle.setText(audio.getTitle());
                     mTvArtist.setText(audio.getArtist());
@@ -144,6 +151,7 @@ public class MainActivity extends BaseActivity
         super.onStart();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(AudioPlayerUtils.MEDIA);
+        intentFilter.addAction(AudioPlayerUtils.ACTION_STOP);
         registerReceiver(mReceiver, intentFilter);
     }
 
@@ -274,7 +282,16 @@ public class MainActivity extends BaseActivity
                 sendBroadcast(previousIntent);
                 break;
             case R.id.image_button_play:
-                Intent playIntent = new Intent(AudioPlayerUtils.ACTION_PLAY);
+                Intent playIntent = new Intent();
+                if (!mIsPlayerPaused) {
+                    playIntent.setAction(AudioPlayerUtils.ACTION_PAUSE);
+                    mIvPlay.setImageResource(R.drawable.btn_play);
+                    mIsPlayerPaused = true;
+                } else {
+                    playIntent.setAction(AudioPlayerUtils.ACTION_PLAY);
+                    mIvPlay.setImageResource(R.drawable.btn_pause);
+                    mIsPlayerPaused = false;
+                }
                 sendBroadcast(playIntent);
                 break;
             case R.id.image_button_next:

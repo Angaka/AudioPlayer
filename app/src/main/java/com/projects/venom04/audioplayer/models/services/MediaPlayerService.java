@@ -119,6 +119,7 @@ public class MediaPlayerService extends Service
                 case ACTION_NEXT:
                     skipToNext();
                     break;
+                case ACTION_PAUSE:
                 case AudioManager.ACTION_AUDIO_BECOMING_NOISY:
                     pauseMedia();
                     break;
@@ -143,7 +144,9 @@ public class MediaPlayerService extends Service
         intentFilter.addAction(AudioPlayerUtils.PLAY_NEW_AUDIO);
         intentFilter.addAction(ACTION_PREVIOUS);
         intentFilter.addAction(ACTION_PLAY);
+        intentFilter.addAction(ACTION_PAUSE);
         intentFilter.addAction(ACTION_NEXT);
+        intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mReceiver, intentFilter);
     }
 
@@ -422,11 +425,11 @@ public class MediaPlayerService extends Service
 
         switch (playbackState) {
             case PlaybackState.STATE_PLAYING:
-                notificationAction = R.drawable.ic_pause;
+                notificationAction = R.drawable.btn_pause;
                 playPauseAction = playbackAction(1);
                 break;
             case PlaybackState.STATE_PAUSED:
-                notificationAction = R.drawable.ic_play;
+                notificationAction = R.drawable.btn_play;
                 playPauseAction = playbackAction(0);
                 break;
         }
@@ -437,12 +440,11 @@ public class MediaPlayerService extends Service
         customNotificationView.setOnClickPendingIntent(R.id.image_button_close, playbackAction(4));
         customNotificationView.setImageViewResource(R.id.image_view_cover, R.drawable.cover_default);
         customNotificationView.setTextViewText(R.id.text_view_title, mActiveAudio.getTitle());
-        customNotificationView.setTextViewText(R.id.text_view_artist, mActiveAudio.getArtist());
-        customNotificationView.setImageViewResource(R.id.image_button_previous, R.drawable.ic_skip_to_previous);
+        customNotificationView.setImageViewResource(R.id.image_button_previous, R.drawable.btn_skip_to_previous);
         customNotificationView.setOnClickPendingIntent(R.id.image_button_previous, playbackAction(3));
         customNotificationView.setImageViewResource(R.id.image_button_play, notificationAction);
         customNotificationView.setOnClickPendingIntent(R.id.image_button_play, playPauseAction);
-        customNotificationView.setImageViewResource(R.id.image_button_next, R.drawable.ic_skip_to_next);
+        customNotificationView.setImageViewResource(R.id.image_button_next, R.drawable.btn_skip_to_next);
         customNotificationView.setOnClickPendingIntent(R.id.image_button_next, playbackAction(2));
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_music);
@@ -454,9 +456,6 @@ public class MediaPlayerService extends Service
                 .setLargeIcon(largeIcon)
                 .setContent(customNotificationView)
                 .build();
-
-        notification.contentView = customNotificationView;
-        notification.bigContentView = customNotificationView;
 
         startForeground(NOTIFICATION_ID, notification);
     }
@@ -478,6 +477,8 @@ public class MediaPlayerService extends Service
                 playbackAction.setAction(ACTION_PREVIOUS);
                 break;
             case 4:
+                Intent stopIntent = new Intent(ACTION_STOP);
+                sendBroadcast(stopIntent);
                 playbackAction.setAction(ACTION_STOP);
                 break;
         }

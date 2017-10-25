@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linear_layout_audio_player"
+    android:baselineAligned="false"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#F5F5F5"
     android:gravity="center_vertical"
     android:minHeight="65dp"
+    android:elevation="10dp"
+    android:visibility="gone"
     android:orientation="horizontal"
     android:paddingEnd="@dimen/default_padding"
     android:paddingStart="@dimen/default_padding"
@@ -26,7 +30,6 @@
             android:fontFamily="sans-serif-medium"
             android:maxLines="1"
             android:singleLine="true"
-            android:text="Title"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/text_size_title" />
 
@@ -38,7 +41,6 @@
             android:fontFamily="sans-serif-light"
             android:maxLines="1"
             android:singleLine="true"
-            android:text="Artist"
             android:textColor="@color/colorPrimaryLight"
             android:textSize="@dimen/text_size_artist" />
     </LinearLayout>
@@ -56,7 +58,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:contentDescription="@string/previous"
-            app:srcCompat="@drawable/ic_skip_to_previous" />
+            app:srcCompat="@drawable/btn_skip_to_previous" />
 
         <ImageButton
             android:id="@+id/image_button_play"
@@ -66,7 +68,7 @@
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"
             android:contentDescription="@string/play"
-            app:srcCompat="@drawable/ic_play" />
+            app:srcCompat="@drawable/btn_pause" />
 
         <ImageButton
             android:id="@+id/image_button_next"
@@ -74,6 +76,6 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:contentDescription="@string/next"
-            app:srcCompat="@drawable/ic_skip_to_next" />
+            app:srcCompat="@drawable/btn_skip_to_next" />
     </LinearLayout>
 </LinearLayout>
