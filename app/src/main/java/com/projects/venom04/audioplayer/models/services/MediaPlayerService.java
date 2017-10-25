@@ -288,6 +288,7 @@ public class MediaPlayerService extends Service
     }
 
     private void playMedia() {
+        if (mMediaPlayer == null) return;
         if (!mMediaPlayer.isPlaying())
             mMediaPlayer.start();
         updateMetaData();
@@ -302,6 +303,7 @@ public class MediaPlayerService extends Service
     }
 
     private void pauseMedia() {
+        if (mMediaPlayer == null) return;
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
             mResumePosition = mMediaPlayer.getCurrentPosition();
@@ -311,6 +313,7 @@ public class MediaPlayerService extends Service
     }
 
     private void resumeMedia() {
+        if (mMediaPlayer == null) return;
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.seekTo(mResumePosition);
             mMediaPlayer.start();
