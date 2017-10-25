@@ -75,7 +75,6 @@ public class MediaPlayerService extends Service
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             switch (intent.getAction()) {
                 case AudioPlayerUtils.PLAY_NEW_AUDIO:
                     try {
@@ -106,6 +105,19 @@ public class MediaPlayerService extends Service
                     initMediaPlayer();
                     updateMetaData();
                     buildNotification(PlaybackState.STATE_PLAYING);
+
+                    Intent playAudioIntent = new Intent(AudioPlayerUtils.MEDIA);
+                    playAudioIntent.putExtra(AudioPlayerUtils.MEDIA, mActiveAudio);
+                    sendBroadcast(playAudioIntent);
+                    break;
+                case ACTION_PREVIOUS:
+                    skipToPrevious();
+                    break;
+                case ACTION_PLAY:
+                    resumeMedia();
+                    break;
+                case ACTION_NEXT:
+                    skipToNext();
                     break;
                 case AudioManager.ACTION_AUDIO_BECOMING_NOISY:
                     pauseMedia();
@@ -129,6 +141,9 @@ public class MediaPlayerService extends Service
 
         IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         intentFilter.addAction(AudioPlayerUtils.PLAY_NEW_AUDIO);
+        intentFilter.addAction(ACTION_PREVIOUS);
+        intentFilter.addAction(ACTION_PLAY);
+        intentFilter.addAction(ACTION_NEXT);
         registerReceiver(mReceiver, intentFilter);
     }
 
@@ -149,9 +164,8 @@ public class MediaPlayerService extends Service
         if (mPhoneStateListener != null)
             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
         stopForeground(true);
-        unregisterReceiver(mReceiver);
-
         mStorageUtil.clearCachedAudioPlaylist();
+        unregisterReceiver(mReceiver);
     }
 
     private void callStateListener() {
@@ -317,6 +331,11 @@ public class MediaPlayerService extends Service
 
         updateMetaData();
         buildNotification(PlaybackState.STATE_PLAYING);
+
+        Intent playAudioIntent = new Intent(AudioPlayerUtils.MEDIA);
+        playAudioIntent.putExtra(AudioPlayerUtils.MEDIA, mActiveAudio);
+        sendBroadcast(playAudioIntent);
+
     }
 
     private void skipToNext() {
@@ -335,6 +354,10 @@ public class MediaPlayerService extends Service
 
         updateMetaData();
         buildNotification(PlaybackState.STATE_PLAYING);
+
+        Intent playAudioIntent = new Intent(AudioPlayerUtils.MEDIA);
+        playAudioIntent.putExtra(AudioPlayerUtils.MEDIA, mActiveAudio);
+        sendBroadcast(playAudioIntent);
     }
 
     @Override

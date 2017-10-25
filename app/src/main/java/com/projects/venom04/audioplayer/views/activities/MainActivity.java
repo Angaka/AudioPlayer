@@ -1,7 +1,9 @@
 package com.projects.venom04.audioplayer.views.activities;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,14 +18,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.projects.venom04.audioplayer.R;
 import com.projects.venom04.audioplayer.controllers.AudioFileManager;
 import com.projects.venom04.audioplayer.models.interfaces.IAudio;
+import com.projects.venom04.audioplayer.models.pojo.Audio;
 import com.projects.venom04.audioplayer.utils.AudioPlayerUtils;
 import com.projects.venom04.audioplayer.utils.PermissionsService;
 import com.projects.venom04.audioplayer.utils.StorageUtil;
@@ -39,7 +43,8 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener
-        , IAudio {
+        , IAudio
+        , View.OnClickListener {
 
     private static final String TAG = "MainActivity";
 
@@ -53,6 +58,32 @@ public class MainActivity extends BaseActivity
     TabLayout mTabLayout;
     @BindView(R.id.view_pager)
     ViewPager mViewPager;
+
+
+    // Audio Player Bottom bar
+    @BindView(R.id.text_view_title)
+    TextView mTvTitle;
+    @BindView(R.id.text_view_artist)
+    TextView mTvArtist;
+    @BindView(R.id.image_button_previous)
+    ImageButton mIvPrevious;
+    @BindView(R.id.image_button_play)
+    ImageButton mIvPlay;
+    @BindView(R.id.image_button_next)
+    ImageButton mIvNext;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case AudioPlayerUtils.MEDIA:
+                    Audio audio = (Audio) intent.getSerializableExtra(AudioPlayerUtils.MEDIA);
+                    mTvTitle.setText(audio.getTitle());
+                    mTvArtist.setText(audio.getArtist());
+                    break;
+            }
+        }
+    };
 
     private PermissionsService mPermissionsService;
     private SharedPreferences mPreferences;
@@ -102,21 +133,24 @@ public class MainActivity extends BaseActivity
             mViewPager.setAdapter(mPagerAdapter);
             mTabLayout.setupWithViewPager(mViewPager);
         }
+
+        mIvPrevious.setOnClickListener(this);
+        mIvPlay.setOnClickListener(this);
+        mIvNext.setOnClickListener(this);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+    protected void onStart() {
+        super.onStart();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(AudioPlayerUtils.MEDIA);
+        registerReceiver(mReceiver, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -221,13 +255,33 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onSelectedAudioInList(int audioIndex) {
+        ArrayList<Audio> audiosList = mAudioFileManager.loadAllAudios(this, null);
+
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
         storageUtil.clearCachedAudioPlaylist();
-        storageUtil.storeAudios(mAudioFileManager.loadAllAudios(this, null));
+        storageUtil.storeAudios(audiosList);
         storageUtil.storeAudioIndex(audioIndex);
 
         Intent broadcastIntent = new Intent(AudioPlayerUtils.PLAY_NEW_AUDIO);
         sendBroadcast(broadcastIntent);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.image_button_previous:
+                Intent previousIntent = new Intent(AudioPlayerUtils.ACTION_PREVIOUS);
+                sendBroadcast(previousIntent);
+                break;
+            case R.id.image_button_play:
+                Intent playIntent = new Intent(AudioPlayerUtils.ACTION_PLAY);
+                sendBroadcast(playIntent);
+                break;
+            case R.id.image_button_next:
+                Intent nextIntent = new Intent(AudioPlayerUtils.ACTION_NEXT);
+                sendBroadcast(nextIntent);
+                break;
+        }
     }
 
     public class PagerAdapter extends FragmentPagerAdapter {
@@ -242,7 +296,6 @@ public class MainActivity extends BaseActivity
 
         @Override
         public Fragment getItem(int position) {
-            Log.d(TAG, "getItem: " + position);
             switch (position) {
                 case 0:
                     return MusicsFragment.newInstance();
